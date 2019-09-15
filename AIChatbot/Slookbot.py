@@ -3,6 +3,7 @@ import requests
 import time
 import spacy
 import re
+import random
 nlp = spacy.load('en_core_web_md')
 from rasa_nlu.training_data import load_data
 from rasa_nlu.config import RasaNLUModelConfig
@@ -61,7 +62,7 @@ def send_message(text, chat_id):
     url = URL + "sendMessage?text={}&chat_id={}".format(text, chat_id)
     get_url(url)
     
-# Use the regular expression to find the ticker/stock symbol in the message
+# Use the regular expression to find the stock ticker symbol in the message
 def find_ticker(message):
     ticker = None
     ticker_pattern = re.compile("[A-Z]{3,}")
@@ -86,7 +87,7 @@ def respond(policy, state, message,text_id):
 
 #The inital state policy is incomplete, this enables to fill in the policy with the message from user
 def fill_policy(message,ORG):
-#Initialize a partial template for the quote    
+#Initialize a partial template for the quote   
     quote={
  'latestPrice': 0,
  'latestVolume': 0,
@@ -108,19 +109,35 @@ def fill_policy(message,ORG):
         try:
             quote=Gquote(ORG)
         except Exception as e:
-            print("There's something wrong with ticker")
             print(e)
+            return
+    #create a ramdom response template to add more personality to the chatbot
+    responses = {'greeting': ["Hi, my name is Stookbot. I'm a Chatbot to help you look up stock market", 
+                         'Hi! How are you. Anything want to check on stock market?', 
+                         "Hi! I'm Stookbot. I know everything on stock market"], 
+         'valuelookup': ["OK,here it is.The market value of {} is {} USD.".format(ORG,quote["marketCap"]), 
+                                  "The market value of {} is {} USD.".format(ORG,quote["marketCap"]), 
+                                  "The latest {}'s market value is {} USD.".format(ORG,quote["marketCap"])
+                                  ], 
+         'volumelookup': ["OK,here it is.The market volume of {} is {} USD.".format(ORG,quote["latestVolume"]), 
+                                  "The market volume of {} is {} USD.".format(ORG,quote["latestVolume"]), 
+                                  "The latest {}'s market volume is {} USD.".format(ORG,quote["latestVolume"])
+                                  ], 
+         'stocklookup': ["OK,here it is.The stock price of {} is {} USD.".format(ORG,quote["latestPrice"]), 
+                                  "The stock price of {} is {} USD.".format(ORG,quote["latestPrice"]), 
+                                  "The latest {}'s stock price is {} USD.".format(ORG,quote["latestPrice"])]
+    }
     #The state policy setup a general process of the dialogue.
     #State is initialized after two search or a new search is implied
     policy_rules = {
-        (INIT, "greet"): (INIT, "Hi, my name is stookbot.I'm a Chatbot to help you look up stock market"),
+        (INIT, "greet"): (INIT, random.choice(responses["greeting"])),
         (INIT, "specORG"): (INIT, "What kind of quote do you want to look up?"),
-        (INIT, "valuelookup"): (SPEC, "The marketcap of {} is {} USD.".format(ORG,quote["marketCap"])),
-        (INIT, "volumelookup"): (SPEC, "The market volume of {} is {} USD.".format(ORG,quote["latestVolume"])),
-        (INIT, "stocklookup"): (SPEC, "The stock price of {} is {} USD.".format(ORG,quote["latestPrice"])),
-        (SPEC, "valuelookup"): (INIT, "OK,here it is.The market value of {} is {} USD.".format(ORG,quote["marketCap"])),
-        (SPEC, "volumelookup"): (INIT, "OK,here it is.The market volume of {} is {} USD.".format(ORG,quote["latestVolume"])),
-        (SPEC, "stocklookup"): (INIT, "OK,here it is.The stock price of {} is {} USD.".format(ORG,quote["latestPrice"])),
+        (INIT, "valuelookup"): (SPEC, random.choice(responses["valuelookup"])),
+        (INIT, "volumelookup"): (SPEC, random.choice(responses["volumelookup"])),
+        (INIT, "stocklookup"): (SPEC, random.choice(responses["stocklookup"])),
+        (SPEC, "valuelookup"): (INIT, random.choice(responses["valuelookup"])),
+        (SPEC, "volumelookup"): (INIT, random.choice(responses["volumelookup"])),
+        (SPEC, "stocklookup"): (INIT, random.choice(responses["stocklookup"])),
         (SPEC, "specORG"): (SPEC, "OK, what kind of quote do you need?"),
         (SPEC, "greet"):(INIT, "Nice to meet you,what stock information do you need?"),
         } 
@@ -142,11 +159,15 @@ def main():
             last_update_id = get_last_update_id(updates) + 1
             (message,text_id)=get_last_chat_id_and_text(updates)
             #The program start with filling the state policy
-            (policy_rules,ORG,val)=fill_policy(message,ORG)
-            if val==0 and state != INIT:    
-                send_message("Please provide the ticker",text_id)
-            else: 
+            try:
+                (policy_rules,ORG,val)=fill_policy(message,ORG)
+                if val==0 and state != INIT:    
+                    send_message("Please provide the ticker",text_id)
+                else: 
                     state=respond(policy_rules, state, message,text_id) 
+            except Exception as e:
+                print(e)
+                send_message("Please provide the correct ticker",text_id)
             time.sleep(0.5)
 
 
