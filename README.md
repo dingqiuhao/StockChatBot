@@ -1,5 +1,5 @@
-# StockBot
-StockBot is a stock Chatbot allows user look up stock market via telegram.By sending message to the stock ticker and the values you want you look up, Stockbot will reply with the requisted informatin.Slookbot so far enables user to look up Stock Price, Market Value and Market volume. 
+# SlookBot
+SlookBot is a stock Chatbot allows user look up stock market via telegram.By sending message to the stock ticker and the values you want you look up, Slokbot will reply with the requisted informatin.Slookbot so far enables user to look up Stock Price, Market Value and Market volume. 
 
 ##Notice
 Please use the correct ticker of the coperation. The progame is not capable of searching stock ticker with given company's name for now. I'll try to encoporate this function in the future.
@@ -26,9 +26,9 @@ pip install rasa_nlu
 pip install -U spacy
 ```
 More information can be found :
-https://legacy-docs.rasa.com/docs/nlu/0.11.4/installation/
-https://spacy.io/usage/
-https://pypi.org/project/iexfinance/
+rasa: https://legacy-docs.rasa.com/docs/nlu/0.11.4/installation/
+spacy: https://spacy.io/usage/
+iexfinance: https://pypi.org/project/iexfinance/
 
 API database used here is IEXfinance.
 To install inexfinance:
