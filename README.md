@@ -10,5 +10,5 @@ The trainning model used in rasa_nlu is made from Chatito DSL: https://rodrigopi
 
 Here's a simple demo of the chatbot: https://youtu.be/l8eGagzQpdY
 
-![Farmers Market Finder Demo](demo/demo.gif)
+![demo](demo.gif)
 
