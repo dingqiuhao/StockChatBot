@@ -10,5 +10,10 @@ The trainning model used in rasa_nlu is made from Chatito DSL: https://rodrigopi
 
 Here's a simple demo of the chatbot: https://youtu.be/l8eGagzQpdY
 
-![demo](demo.gif)
+![demo](demo/demo.gif)
+
+API database used here is IEXfinance.
+To install inexfinance:
+
+$ pip3 install iexfinance
 
